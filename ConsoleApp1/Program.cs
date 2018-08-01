@@ -6,10 +6,12 @@ namespace HighCardFlush
 {
     class Game
     {
-        int card, money, pLargeF, dLargeF, sTracker;
-        int ante, raise, straightBet, straightProfit, flushBet, flushProfit;
-        int curStraight, largeStraight;
+        public int totalHands, money;
+        int card, pLargeF, dLargeF, sTracker;
+        int ante, raise, straightBet, flushBet;
+        int curStraight, largeStraight, straightProfit, flushProfit;
         int pIndexL, pIndexR, dIndexL, dIndexR;
+        int hands, wins;
         bool pQualify, dQualify;
         Random rnd = new Random();
         int[] pH = new int[7];
@@ -77,6 +79,7 @@ namespace HighCardFlush
                     break;
 
                 default:
+                    raise = ante;
                     break;
             }
         }
@@ -84,7 +87,7 @@ namespace HighCardFlush
         private void checkStraight()
         {
 
-            for (int i = 0; i < 7; i++)
+            for (int i = 0; i < 6; i++)
             {
                 if (pH[i] + 1 == pH[i + 1]) curStraight++;
                 else
@@ -138,7 +141,7 @@ namespace HighCardFlush
                 {
                     pIndexL += pFCounter[i];                    
                 }
-                pIndexR = pIndexL + pLargeF;
+                pIndexR = pIndexL + pLargeF - 1;
                 pQualify = (pH[pIndexR] / (k + 1) > 8);
             }
         }
@@ -154,38 +157,103 @@ namespace HighCardFlush
                 {
                     dIndexL += dFCounter[i];
                 }
-                dIndexR = dIndexL + dLargeF;
+                dIndexR = dIndexL + dLargeF - 1;
                 dQualify = (dH[dIndexR] / (k + 1) > 6);
             }
         }
 
         private void payRaise()
         {
-            if (!pQualify) return;
-            else if (!dQualify) money += ante * 2;
-            else if (dLargeF > pLargeF) money -= raise;
-            else if (pLargeF > dLargeF) money += raise + ante * 2;
+            if (!pQualify)
+            {
+                wins--;
+
+            }
+            else if (!dQualify)
+            {
+                money += ante * 2;
+                wins++;
+            }
+            else if (dLargeF > pLargeF)
+            {
+                money -= raise;
+                wins--;
+            }
+            else if (pLargeF > dLargeF)
+            {
+                money += raise + ante * 2;
+                wins++;
+            }
             else
             {
                 for (int i = 0; i < dLargeF; i++)
                 {
 
+                    if (dH[dIndexL + i] > pH[pIndexL + i])
+                    {
+                        money -= raise;
+                        wins--;
+                        break;
+                    }
+                    if (pH[pIndexL + i] > dH[dIndexL + i])
+                    {
+                        money += raise + ante * 2;
+                        wins++;
+                        break;
+                    }
                 }
             }
         }
-        
+
+        private void print()
+        {
+            Console.WriteLine("Money is {0}", money);
+            Console.WriteLine("Straight profit is {0}", straightProfit);
+            Console.WriteLine("Flush profit is {0}\n", flushProfit);
+
+        }
+
+        private void newTurn()
+        {
+            hands++;
+            dIndexL = dIndexR = pIndexL = pIndexR = 0;
+                for (int i = 0; i < 4; i++)
+            {
+                pFCounter[i] = 0;
+                dFCounter[i] = 0;
+            }
+        }
+
         public void play()
         {
-            pay();
-            deal();
-            checkFlush();
-            payFlush();
-            checkStraight();
-            payStraight();
-            playerQualify();
-            dealerQualify();
-            payRaise();
+            while (money > 40 && hands < totalHands)
+            {
+                
+                newTurn();
+                pay();
+                deal();
+                checkFlush();
+                payFlush();
+                checkStraight();
+                payStraight();
+                playerQualify();
+                dealerQualify();
+                payRaise();
+                print();
+            }
 
+        }
+
+        public void newGame()
+        {
+            ante = 15;
+            money = 150;
+            straightBet = 5;
+            flushBet = 5;
+            wins = 0;
+            hands = 0;
+            straightProfit = 0;
+            flushProfit = 0;
         }
     }
 
@@ -194,8 +262,19 @@ namespace HighCardFlush
        
         static void Main(string[] args)
         {
-            Game game = new Game();
-            game.play();
+            int sum = 0;
+            Game game = new Game() { totalHands = 30 };
+               
+            for (int i = 0; i < 5; i++)
+            {
+                game.newGame();
+                game.play();
+                sum += game.money;
+
+            }
+
+            Console.WriteLine("Average money is {0}", sum/5);
+            Console.ReadLine();
 
         }
     }
