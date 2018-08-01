@@ -6,12 +6,12 @@ namespace HighCardFlush
 {
     class Game
     {
-        public int totalHands, money;
+        public int totalHands, money, wins, SDF, straightProfit, flushProfit;
         int card, pLargeF, dLargeF, sTracker;
         int ante, raise, straightBet, flushBet;
-        int curStraight, largeStraight, straightProfit, flushProfit;
+        int curStraight, largeStraight;
         int pIndexL, pIndexR, dIndexL, dIndexR;
-        int hands, wins;
+        int hands;
         bool pQualify, dQualify;
         Random rnd = new Random();
         int[] pH = new int[7];
@@ -22,6 +22,8 @@ namespace HighCardFlush
         private void pay()
         {
             money -= (flushBet + straightBet + ante);
+            flushProfit -= flushBet;
+            straightProfit -= straightBet;
         }
 
         private void deal()
@@ -58,23 +60,23 @@ namespace HighCardFlush
             {
                 case 4:
                     money += flushBet * 3;
-                    flushProfit += flushBet * 2;
+                    flushProfit += flushBet * 3;
                     raise = ante;
                     break;
 
                 case 5:
                     money += flushBet * 11;
-                    flushProfit += flushBet * 10;
+                    flushProfit += flushBet * 11;
                     raise = ante;
                     break;
                 case 6:
                     money += flushBet * 26;
-                    flushProfit += flushBet * 25;
+                    flushProfit += flushBet * 26;
                     raise = 2 * ante;
                     break;
                 case 7:
                     money += flushBet * 301;
-                    flushProfit += flushBet * 300;
+                    flushProfit += flushBet * 301;
                     raise = 3 * ante;
                     break;
 
@@ -95,6 +97,7 @@ namespace HighCardFlush
                     if (curStraight > largeStraight) largeStraight = curStraight;
                     curStraight = 0;
                 }
+                if (largeStraight > 2) SDF++;
             }            
         }
 
@@ -104,25 +107,25 @@ namespace HighCardFlush
             {
                 case 3:
                     money += straightBet * 10;
-                    flushProfit += straightBet * 9;
+                    straightProfit += straightBet * 10;
                     break;
 
                 case 4:
                     money += straightBet * 51;
-                    flushProfit += straightBet * 50;
+                    straightProfit += straightBet * 51;
                     break;
 
                 case 5:
                     money += straightBet * 101;
-                    flushProfit += straightBet * 100;
+                    straightProfit += straightBet * 101;
                     break;
                 case 6:
                     money += straightBet * 251;
-                    flushProfit += straightBet * 250;
+                    straightProfit += straightBet * 251;
                     break;
                 case 7:
                     money += straightBet * 501;
-                    flushProfit += straightBet * 500;
+                    straightProfit += straightBet * 501;
                     break;
 
                 default:
@@ -164,21 +167,13 @@ namespace HighCardFlush
 
         private void payRaise()
         {
-            if (!pQualify)
-            {
-                wins--;
-
-            }
+            if (!pQualify) return;
             else if (!dQualify)
             {
                 money += ante * 2;
                 wins++;
             }
-            else if (dLargeF > pLargeF)
-            {
-                money -= raise;
-                wins--;
-            }
+            else if (dLargeF > pLargeF) money -= raise;
             else if (pLargeF > dLargeF)
             {
                 money += raise + ante * 2;
@@ -192,7 +187,6 @@ namespace HighCardFlush
                     if (dH[dIndexL + i] > pH[pIndexL + i])
                     {
                         money -= raise;
-                        wins--;
                         break;
                     }
                     if (pH[pIndexL + i] > dH[dIndexL + i])
@@ -226,7 +220,7 @@ namespace HighCardFlush
 
         public void play()
         {
-            while (money > 40 && hands < totalHands)
+            while (hands < totalHands)
             {
                 
                 newTurn();
@@ -239,7 +233,7 @@ namespace HighCardFlush
                 playerQualify();
                 dealerQualify();
                 payRaise();
-                print();
+               // print();
             }
 
         }
@@ -262,18 +256,22 @@ namespace HighCardFlush
        
         static void Main(string[] args)
         {
-            int sum = 0;
-            Game game = new Game() { totalHands = 30 };
+            double win = 0;
+            Game game = new Game() { totalHands = 10000000 };
                
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 1; i++)
             {
                 game.newGame();
                 game.play();
-                sum += game.money;
+                Console.WriteLine("StraightPr for this game is {0}\n", game.straightProfit/10000000);
+                Console.WriteLine("Flushpr for this game is {0}\n", game.flushProfit/10000000);
+
+
+                win += game.wins;
 
             }
 
-            Console.WriteLine("Average money is {0}", sum/5);
+            Console.WriteLine("win percentage is {0}%", win*100/10000000);
             Console.ReadLine();
 
         }
