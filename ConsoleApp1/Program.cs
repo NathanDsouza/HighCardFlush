@@ -6,9 +6,9 @@ namespace HighCardFlush
 {
     class Game
     {
-        public int totalHands, money, wins, SDF, straightProfit, flushProfit;
+        public int totalHands, money, wins, maxCash, straightProfit, flushProfit;
         int card, pLargeF, dLargeF, sTracker;
-        int ante, raise, straightBet, flushBet;
+      public  int ante, raise, straightBet, flushBet;
         int curStraight, largeStraight;
         int pIndexL, pIndexR, dIndexL, dIndexR;
         int hands;
@@ -45,6 +45,8 @@ namespace HighCardFlush
 
         private void checkFlush()
         {
+            pLargeF = 0;
+            dLargeF = 0;
             for (int i = 0; i < 7; i++)
             {
                 pFCounter[(pH[i] / 13)]++;
@@ -88,7 +90,8 @@ namespace HighCardFlush
 
         private void checkStraight()
         {
-
+            curStraight = 0;
+            largeStraight = 0;
             for (int i = 0; i < 6; i++)
             {
                 if (pH[i] + 1 == pH[i + 1]) curStraight++;
@@ -97,7 +100,6 @@ namespace HighCardFlush
                     if (curStraight > largeStraight) largeStraight = curStraight;
                     curStraight = 0;
                 }
-                if (largeStraight > 2) SDF++;
             }            
         }
 
@@ -220,7 +222,7 @@ namespace HighCardFlush
 
         public void play()
         {
-            while (hands < totalHands)
+            while (money > 40 && hands < totalHands)
             {
                 
                 newTurn();
@@ -233,7 +235,9 @@ namespace HighCardFlush
                 playerQualify();
                 dealerQualify();
                 payRaise();
-               // print();
+                if (maxCash < money) maxCash = money;
+
+                // print();
             }
 
         }
@@ -242,12 +246,14 @@ namespace HighCardFlush
         {
             ante = 15;
             money = 150;
-            straightBet = 5;
-            flushBet = 5;
+            straightBet = 0;
+            flushBet = 0;
             wins = 0;
             hands = 0;
             straightProfit = 0;
             flushProfit = 0;
+            maxCash = money;
+            pLargeF = 0;
         }
     }
 
@@ -256,22 +262,72 @@ namespace HighCardFlush
        
         static void Main(string[] args)
         {
-            double win = 0;
-            Game game = new Game() { totalHands = 10000000 };
+            double sum = 0;
+            Game game = new Game() { totalHands = 30 };
+            Console.WriteLine("30 hands played in one game, 100000 games ran\nAverage money at the end of each game is shown below");
                
-            for (int i = 0; i < 1; i++)
+            for (int i = 0; i < 100000; i++)
             {
                 game.newGame();
                 game.play();
-                Console.WriteLine("StraightPr for this game is {0}\n", game.straightProfit/10000000);
-                Console.WriteLine("Flushpr for this game is {0}\n", game.flushProfit/10000000);
 
-
-                win += game.wins;
+                //Console.WriteLine("money for game is {0}", game.money);
+                sum += game.maxCash;
 
             }
+            Console.WriteLine("money w no bonuses played is {0}", sum / 100000);
+            sum = 0;
+            for (int i = 0; i < 100000; i++)
+            {
+                game.newGame();
+                game.flushBet = 5;
+                game.play();
 
-            Console.WriteLine("win percentage is {0}%", win*100/10000000);
+                //Console.WriteLine("money for game is {0}", game.money);
+                sum += game.maxCash;
+
+            }
+            Console.WriteLine("money w flush bonus at $5 is {0}", sum / 100000);
+
+            sum = 0;
+            for (int i = 0; i < 100000; i++)
+            {
+                game.newGame();
+                game.flushBet = 10;
+                game.play();
+
+                //Console.WriteLine("money for game is {0}", game.money);
+                sum += game.maxCash;
+
+            }
+            Console.WriteLine("money w flush bonus at $10 is {0}", sum / 100000);
+            sum = 0;
+            for (int i = 0; i < 100000; i++)
+            {
+                game.newGame();
+                game.straightBet = 5;
+                game.play();
+
+                //Console.WriteLine("money for game is {0}", game.money);
+                sum += game.maxCash;
+
+            }
+            Console.WriteLine("money w straight bonus at $5 is {0}", sum / 100000);
+
+            game.flushBet = 0;
+            sum = 0;
+            for (int i = 0; i < 100000; i++)
+            {
+                game.newGame();
+                game.straightBet = 5;
+                game.flushBet = 5;
+                game.play();
+
+                //Console.WriteLine("money for game is {0}", game.money);
+                sum += game.maxCash;
+
+            }
+            Console.WriteLine("money w both bonuses at $5 is {0}", sum / 100000);
             Console.ReadLine();
 
         }
