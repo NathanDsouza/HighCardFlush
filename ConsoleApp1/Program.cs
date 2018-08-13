@@ -7,7 +7,7 @@ namespace HighCardFlush
 {
     class Game
     {
-        public int totalHands, money, wins, maxCash, straightProfit, flushProfit;
+        public int totalHands, money, wins, maxCash, straightProfit, flushProfit, a, b;
 
         int card, pLargeFlush, dLargeFlush, pK, dK;
         public  int ante, raise, straightBet, flushBet;
@@ -36,8 +36,8 @@ namespace HighCardFlush
             for (int i = 0; i < 14; i++)
             {
                 card = rnd.Next(deck.Count());
-                if (i < 7) pH[i] = card;
-                else dH[i - 7] = card;
+                if (i < 7) pH[i] = deck[card];
+                else dH[i - 7] = deck[card];
                 deck.RemoveAt(card);
             }
             Array.Sort(pH);
@@ -80,7 +80,7 @@ namespace HighCardFlush
                 case 6:
                     money += flushBet * 26;
                     flushProfit += flushBet * 26;
-                    raise = 2 * ante;
+                    raise = 3 * ante;
                     break;
                 case 7:
                     money += flushBet * 301;
@@ -143,8 +143,7 @@ namespace HighCardFlush
             {
                 pQualify = false;
                 raise = 0;
-            }
-            else if (pLargeFlush > 3) pQualify = true;
+            }           
             else
             {
                 pK = Array.FindIndex(pSuitCounter, x => x == pLargeFlush);
@@ -152,14 +151,15 @@ namespace HighCardFlush
                 {
                     pIndexL += pSuitCounter[i];
                 }
-                pQualify = (pH[pIndexL] - (pK * 13) < 4);
+                a = pH[pIndexL] - (pK * 13);
+                if (pLargeFlush > 3) pQualify = true;
+                else pQualify = (pH[pIndexL] - (pK * 13) < 4);
             }
         }
 
         private void dealerQualify()
         {
             if (dLargeFlush < 3) dQualify = false;
-            else if (dLargeFlush > 3) dQualify = true;
             else
             {
                 dK = Array.FindIndex(dSuitCounter, x => x == dLargeFlush);
@@ -167,7 +167,9 @@ namespace HighCardFlush
                 {
                     dIndexL += dSuitCounter[i];
                 }
-                dQualify = (dH[dIndexL] - (dK*13) < 7 );
+                b = dH[dIndexL] - (dK * 13);
+                if (dLargeFlush > 3) dQualify = true;
+                else  dQualify = (dH[dIndexL] - (dK*13) < 7 );
             }
         }
 
@@ -215,12 +217,15 @@ namespace HighCardFlush
                 Console.Write(" {0}", pH[i]);
             }
             Console.WriteLine("\nPlayer largest flush is {0}, player qualify {1}", pLargeFlush, pQualify);
+            Console.WriteLine("High card is {0}", a);
             Console.Write("\nDealer hand is:");
             for (int i = 0; i < 7; i++)
             {
                 Console.Write(" {0}", dH[i]);
             }
             Console.WriteLine("\nDealer largest flush is {0}, dealer qualify {1}", dLargeFlush, dQualify);
+            Console.WriteLine("High card is {0}", b);
+
             Console.WriteLine("Wins is {0}, hands are {1}", wins, hands);
             Console.WriteLine("Money is {0}", money);
 
@@ -310,7 +315,7 @@ namespace HighCardFlush
            // test.ya();
 
             decimal sum = 0;
-            Game game = new Game() { totalHands = 100000 };
+            Game game = new Game() { totalHands = 1000000 };
                
             for (int i = 0; i < 1; i++)
             {
