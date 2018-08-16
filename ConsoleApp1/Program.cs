@@ -25,9 +25,9 @@ namespace HighCardFlush
         private void placeBets()
         {
             //Function to pay the bonuses and ante 
-            money -= (flushBet + straightBet + ante);
-            flushProfit -= flushBet;
-            straightProfit -= straightBet;
+            money -= ante; //flushBet + straightBet
+                           // flushProfit -= flushBet;
+                           // straightProfit -= straightBet;
         }
 
         private void deal()
@@ -60,31 +60,32 @@ namespace HighCardFlush
 
         private void payFlush()
         {
-            //Pays out the flush bonus if played
+            //Pays out the flush bonus if played and calculates how much to raise
             switch (pLargeFlush)
             {
                 case 2:
                 case 3:
+                    raise = ante;
                     break;
                 case 4:
-                    money += flushBet * 3;
-                    flushProfit += flushBet * 3;
+                  //  money += flushBet * 3;
+                 //   flushProfit += flushBet * 3;
                     raise = ante;
                     break;
 
                 case 5:
-                    money += flushBet * 11;
-                    flushProfit += flushBet * 11;
-                    raise = ante;
+                 //   money += flushBet * 11;
+                  //  flushProfit += flushBet * 11;
+                    raise = ante * 2;
                     break;
                 case 6:
-                    money += flushBet * 26;
-                    flushProfit += flushBet * 26;
+                  //  money += flushBet * 26;
+                   // flushProfit += flushBet * 26;
                     raise = 3 * ante;
                     break;
                 case 7:
-                    money += flushBet * 301;
-                    flushProfit += flushBet * 301;
+                  //  money += flushBet * 301;
+                  //  flushProfit += flushBet * 301;
                     raise = 3 * ante;
                     break;
                     
@@ -109,7 +110,6 @@ namespace HighCardFlush
         {
             switch (largeStraight)
             {
-                case 1:
                 case 2:
                     break;
                 case 3:
@@ -142,7 +142,6 @@ namespace HighCardFlush
             if (pLargeFlush < 3)
             {
                 pQualify = false;
-                raise = 0;
             }           
             else
             {
@@ -151,7 +150,7 @@ namespace HighCardFlush
                 {
                     pIndexL += pSuitCounter[i];
                 }
-                a = pH[pIndexL] - (pK * 13);
+               
                 if (pLargeFlush > 3) pQualify = true;
                 else pQualify = (pH[pIndexL] - (pK * 13) < 4);
             }
@@ -167,15 +166,18 @@ namespace HighCardFlush
                 {
                     dIndexL += dSuitCounter[i];
                 }
-                b = dH[dIndexL] - (dK * 13);
+                b = dH[dIndexL];
                 if (dLargeFlush > 3) dQualify = true;
-                else  dQualify = (dH[dIndexL] - (dK*13) < 7 );
+                else  dQualify = (dH[dIndexL] - (dK*13) < 6 );
             }
         }
 
         private void payRaise()
         {
-            if (!pQualify) return;
+            if (!pQualify)
+            {
+                raise = 0;
+            }
             else if (!dQualify)
             {
                 money += ante * 2;
@@ -211,23 +213,30 @@ namespace HighCardFlush
         {
             // Console.WriteLine("Straight profit is {0}", straightProfit);
             // Console.WriteLine("Flush profit is {0}\n", flushProfit);
-            Console.Write("Player Hand is:");
+            int card;
+            Console.WriteLine("Player Hand is:");
             for (int i = 0; i < 7; i++)
             {
-                Console.Write(" {0}", pH[i]);
+                card = pH[i];
+                if (card < 13) Console.WriteLine("Hearts {0}", card);
+                else if (card < 26) Console.WriteLine("Spades {0}", card - 13);
+                else if (card < 39) Console.WriteLine("Diamonds {0}", card - 26);
+                else Console.WriteLine("Clubs {0}", card - 39);
             }
             Console.WriteLine("\nPlayer largest flush is {0}, player qualify {1}", pLargeFlush, pQualify);
-            Console.WriteLine("High card is {0}", a);
-            Console.Write("\nDealer hand is:");
+            Console.WriteLine("\nDealer hand is:");
             for (int i = 0; i < 7; i++)
             {
-                Console.Write(" {0}", dH[i]);
+                card = dH[i];
+                if (card < 13) Console.WriteLine("Hearts {0}", card);
+                else if (card < 26) Console.WriteLine("Spades {0}", card - 13);
+                else if (card < 39) Console.WriteLine("Diamonds {0}", card - 26);
+                else Console.WriteLine("Clubs {0}", card - 39);
             }
             Console.WriteLine("\nDealer largest flush is {0}, dealer qualify {1}", dLargeFlush, dQualify);
-            Console.WriteLine("High card is {0}", b);
 
             Console.WriteLine("Wins is {0}, hands are {1}", wins, hands);
-            Console.WriteLine("Money is {0}", money);
+            Console.WriteLine("Money is {0}, raise {1}", money, raise);
 
             Console.ReadLine();
         }
@@ -257,8 +266,8 @@ namespace HighCardFlush
                 checkFlush();
                 payFlush();
 
-                checkStraight();
-                payStraight();
+                //checkStraight();
+               // payStraight();
                 playerQualify();
                 dealerQualify();
                 payRaise();
@@ -268,7 +277,7 @@ namespace HighCardFlush
                 // if (maxCash < money) maxCash = money;
 
 
-                //  print();
+               //  print();
             }
 
         }
@@ -311,11 +320,11 @@ namespace HighCardFlush
        
         static void Main(string[] args)
         {
-           // Flip test = new Flip();
-           // test.ya();
+            // Flip test = new Flip();
+            // test.ya();
 
             decimal sum = 0;
-            Game game = new Game() { totalHands = 1000000 };
+            Game game = new Game() { totalHands = 10000000 };
                
             for (int i = 0; i < 1; i++)
             {
@@ -323,13 +332,12 @@ namespace HighCardFlush
                 game.play();
 
                 //Console.WriteLine("money for game is {0}", game.money);
+                sum += game.money;
                 
             }
-            sum = (decimal)game.money/game.maxCash;
-            Console.WriteLine("cash spent is {0}", game.maxCash);
-            Console.WriteLine("money at end of game is {0}", game.money);
-            Console.WriteLine("Player advanatage is {0}", sum*100);
-            Console.ReadLine();
+               sum = (decimal)game.money/game.maxCash;
+            Console.WriteLine("Player advantage {0}", sum * 100);
+         
             //sum = 0;
             //for (int i = 0; i < 100000; i++)
             //{
@@ -338,7 +346,7 @@ namespace HighCardFlush
             //    game.play();
 
             //    //Console.WriteLine("money for game is {0}", game.money);
-            //    sum += game.maxCash;
+            //    sum += game.money;
 
             //}
             //Console.WriteLine("money w flush bonus at $5 is {0}", sum / 100000);
@@ -351,7 +359,7 @@ namespace HighCardFlush
             //    game.play();
 
             //    //Console.WriteLine("money for game is {0}", game.money);
-            //    sum += game.maxCash;
+            //    sum += game.money;
 
             //}
             //Console.WriteLine("money w flush bonus at $10 is {0}", sum / 100000);
@@ -363,7 +371,7 @@ namespace HighCardFlush
             //    game.play();
 
             //    //Console.WriteLine("money for game is {0}", game.money);
-            //    sum += game.maxCash;
+            //    sum += game.money;
 
             //}
             //Console.WriteLine("money w straight bonus at $5 is {0}", sum / 100000);
@@ -378,11 +386,11 @@ namespace HighCardFlush
             //    game.play();
 
             //    //Console.WriteLine("money for game is {0}", game.money);
-            //    sum += game.maxCash;
+            //    sum += game.money;
 
             //}
             //Console.WriteLine("money w both bonuses at $5 is {0}", sum / 100000);
-            //Console.ReadLine();
+            Console.ReadLine();
 
         }
     }
